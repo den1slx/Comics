@@ -11,8 +11,8 @@
 pip install -r requirements.txt
 ```
 
-Создайте файл `.env` в корне проекта и добавьте необходимые переменные окружения:
-VK_ACCESS_TOKEN - ваш токен с разрешениями: **scope=groups,photos,offline,wall**  
+Создайте файл `.env` в корне проекта и добавьте необходимые переменные окружения:  
+VK_ACCESS_TOKEN - ваш [ВК](https://vk.com/) токен с разрешениями: **scope=groups,photos,offline,wall**  
 VK_GROUP_ID - id группы или пользователя  
 PATH_TO_SAVE_IMAGES - путь для сохранения файлов  
 
