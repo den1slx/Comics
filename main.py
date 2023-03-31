@@ -52,17 +52,13 @@ def get_img_xkcd(target_image=None):
         url = f'https://xkcd.com/{num}/info.0.json'
         response = requests.get(url)
         info = response.json()
-        # img = info["img"]
-        # title = info['title']
-        # alt = info['alt']
         return info["img"], info['title'], info['alt']
 
 
 def vk_upload(vk_session, image_name, image_data):
     response = vk_session.method('photos.getWallUploadServer'),
     if 'error' in response:
-        print(response)
-        raise Exception
+        raise Exception(response.text)
     album_id, upload_url, user_id = response[0].values()
     response = requests.post(upload_url, files={"photo": (image_name, image_data)})
     response.raise_for_status()
@@ -101,8 +97,8 @@ def main():
     vk_access_token = os.getenv('VK_ACCESS_TOKEN')
     vk_session = vk_api.VkApi(token=vk_access_token)
     vk = vk_session.get_api()
-    paresr = create_parser()
-    args = paresr.parse_args()
+    parser = create_parser()
+    args = parser.parse_args()
     group_id = args.id
     path_to_images = args.path
     target = args.target_image
