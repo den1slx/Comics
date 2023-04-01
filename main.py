@@ -25,20 +25,13 @@ def fetch_file(path, url, name, extension='', token=None):
         picture.write(response.content)
 
 
-def get_name_and_extension_file(url, is_tuple=True, name_only=False, extension_only=False):
+def get_name_and_extension_file(url):
     url_split = urlsplit(url)
     path = url_split.path
     path = unquote(path)
     head, tail = os.path.split(path)
     name, extension = os.path.splitext(tail)
-    if name_only:
-        return name
-    if extension_only:
-        return extension
-    if is_tuple:
-        return name, extension
-    else:
-        return f'{name}{extension}'
+    return name, extension
 
 
 def get_img_xkcd():
