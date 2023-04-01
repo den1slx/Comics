@@ -1,4 +1,4 @@
-from pathlib import Path, PurePath
+from pathlib import Path
 import requests
 from urllib.parse import urlsplit, unquote
 import os
@@ -6,6 +6,7 @@ import vk_api
 from dotenv import load_dotenv
 from random import randint
 import argparse
+import io
 
 
 def create_directory(path):
@@ -14,15 +15,14 @@ def create_directory(path):
     return path
 
 
-def fetch_file(path, url, name, extension='', token=None):
+def fetch_buffered_file(url, token=None):
     headers = {
         'api_key': token,
     }
     response = requests.get(url, headers)
     response.raise_for_status()
-    fullpath = PurePath(path).joinpath(f'{name}{extension}')
-    with open(fullpath, 'wb') as picture:
-        picture.write(response.content)
+    image = io.BytesIO(response.content)
+    return image
 
 
 def get_name_and_extension_file(url):
@@ -47,12 +47,12 @@ def get_img_xkcd():
     return response["img"], response['title'], response['alt']
 
 
-def upload_to_vk(vk_session, image_name, image_data):
+def upload_to_vk(vk_session, image, name):
     response = vk_session.method('photos.getWallUploadServer'),
     if 'error' in response:
-        raise Exception(response.text)
+        raise Exception(response)
     album_id, upload_url, user_id = response[0].values()
-    response = requests.post(upload_url, files={"photo": (image_name, image_data)})
+    response = requests.post(upload_url, files={"photo": (name, image)})
     response.raise_for_status()
     server, photo, hash_ = response.json().values()
     photos = vk_session.method(
@@ -66,11 +66,6 @@ def upload_to_vk(vk_session, image_name, image_data):
 
 def create_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-path',
-        help='Path to save image, can be defined in env PATH_TO_SAVE_IMAGES',
-        default=os.getenv('PATH_TO_SAVE_IMAGES', default=None),
-    )
     parser.add_argument(
         '-id',
         help='Group or user id, can be defined in env VK_GROUP_ID',
@@ -87,19 +82,12 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
     group_id = args.id
-    path_to_images = args.path
-    img, title, alt = get_img_xkcd()
-    default_name, default_extension = get_name_and_extension_file(img)
-    path = create_directory(path_to_images)
-    fetch_file(path, img, default_name, default_extension)
+    image_url, title, alt = get_img_xkcd()
+    default_name, default_extension = get_name_and_extension_file(image_url)
+    image = fetch_buffered_file(image_url)
     img_name = f'{default_name}{default_extension}'
-    fullpath = PurePath(path).joinpath(img_name)
-    with open(fullpath, 'rb') as file:
-        img_data = file.read()
-
-    attachment = upload_to_vk(vk_session, img_name, img_data)
+    attachment = upload_to_vk(vk_session, image, img_name)
     vk.wall.post(owner_id=group_id, message=alt, attachments=attachment)
-    os.remove(fullpath)
 
 
 if __name__ == '__main__':
