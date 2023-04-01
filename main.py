@@ -41,21 +41,15 @@ def get_name_and_extension_file(url, is_tuple=True, name_only=False, extension_o
         return f'{name}{extension}'
 
 
-def get_img_xkcd(target_image=None):
-    if target_image:
-        url = f'https://xkcd.com/{target_image}/info.0.json'
-        response = requests.get(url)
-        info = response.json()
-        return info["img"], info['title'], info['alt']
-    else:
-        url = f'https://xkcd.com/info.0.json'
-        response = requests.get(url)
-        last_num = response.json()['num']
-        num = randint(0, last_num)
-        url = f'https://xkcd.com/{num}/info.0.json'
-        response = requests.get(url)
-        info = response.json()
-        return info["img"], info['title'], info['alt']
+def get_img_xkcd():
+    url = f'https://xkcd.com/info.0.json'
+    response = requests.get(url)
+    last_num = response.json()['num']
+    num = randint(0, last_num)
+    url = f'https://xkcd.com/{num}/info.0.json'
+    response = requests.get(url)
+    info = response.json()
+    return info["img"], info['title'], info['alt']
 
 
 def vk_upload(vk_session, image_name, image_data):
@@ -87,11 +81,6 @@ def create_parser():
         help='Group or user id, can be defined in env VK_GROUP_ID',
         default=os.getenv('VK_GROUP_ID', default=None),
     )
-    parser.add_argument(
-        '-t',
-        '--target_image', help='num image in xkcd for download targeted image.(not randomed)',
-        default=None,
-    )
     return parser
 
 
@@ -104,8 +93,7 @@ def main():
     args = parser.parse_args()
     group_id = args.id
     path_to_images = args.path
-    target = args.target_image
-    img, title, alt = get_img_xkcd(target_image=target)
+    img, title, alt = get_img_xkcd()
     default_name, default_extension = get_name_and_extension_file(img)
     path = create_directory(path_to_images)
     fetch_file(path, img, default_name, default_extension)
