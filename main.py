@@ -8,15 +8,18 @@ from random import randint
 import argparse
 
 
+def create_directory(path):
+    path = Path(path)
+    path.mkdir(parents=True, exist_ok=True)
+    return path
+
+
 def fetch_file(path, url, name, extension='', token=None):
-    images = Path(path)
-    images.mkdir(parents=True, exist_ok=True)
     headers = {
         'api_key': token,
     }
     response = requests.get(url, headers)
     response.raise_for_status()
-
     fullpath = PurePath(path).joinpath(f'{name}{extension}')
     with open(fullpath, 'wb') as picture:
         picture.write(response.content)
@@ -104,9 +107,10 @@ def main():
     target = args.target_image
     img, title, alt = get_img_xkcd(target_image=target)
     default_name, default_extension = get_name_and_extension_file(img)
-    fetch_file(path_to_images, img, default_name, default_extension)
+    path = create_directory(path_to_images)
+    fetch_file(path, img, default_name, default_extension)
     img_name = f'{default_name}{default_extension}'
-    fullpath = PurePath(path_to_images).joinpath(img_name)
+    fullpath = PurePath(path).joinpath(img_name)
     with open(fullpath, 'rb') as file:
         img_data = file.read()
 
