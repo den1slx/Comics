@@ -44,12 +44,14 @@ def get_name_and_extension_file(url, is_tuple=True, name_only=False, extension_o
 def get_img_xkcd():
     url = f'https://xkcd.com/info.0.json'
     response = requests.get(url)
+    response.raise_for_status()
     last_num = response.json()['num']
     num = randint(0, last_num)
     url = f'https://xkcd.com/{num}/info.0.json'
     response = requests.get(url)
-    info = response.json()
-    return info["img"], info['title'], info['alt']
+    response.raise_for_status()
+    response = response.json()
+    return response["img"], response['title'], response['alt']
 
 
 def upload_to_vk(vk_session, image_name, image_data):
