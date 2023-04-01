@@ -88,7 +88,7 @@ def create_parser():
 
 def main():
     load_dotenv()
-    vk_access_token = os.getenv('VK_ACCESS_TOKEN')
+    vk_access_token = os.environ['VK_ACCESS_TOKEN']
     vk_session = vk_api.VkApi(token=vk_access_token)
     vk = vk_session.get_api()
     parser = create_parser()
