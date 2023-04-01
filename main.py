@@ -52,7 +52,7 @@ def get_img_xkcd():
     return info["img"], info['title'], info['alt']
 
 
-def vk_upload(vk_session, image_name, image_data):
+def upload_vk(vk_session, image_name, image_data):
     response = vk_session.method('photos.getWallUploadServer'),
     if 'error' in response:
         raise Exception(response.text)
@@ -102,7 +102,7 @@ def main():
     with open(fullpath, 'rb') as file:
         img_data = file.read()
 
-    attachment = vk_upload(vk_session, img_name, img_data)
+    attachment = upload_vk(vk_session, img_name, img_data)
     vk.wall.post(owner_id=group_id, message=alt, attachments=attachment)
     os.remove(fullpath)
 
