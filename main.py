@@ -1,18 +1,10 @@
-from pathlib import Path
 import requests
-from urllib.parse import urlsplit, unquote
 import os
 import vk_api
 from dotenv import load_dotenv
 from random import randint
 import argparse
 import io
-
-
-def create_directory(path):
-    path = Path(path)
-    path.mkdir(parents=True, exist_ok=True)
-    return path
 
 
 def fetch_buffered_file(url, token=None):
@@ -23,15 +15,6 @@ def fetch_buffered_file(url, token=None):
     response.raise_for_status()
     image = io.BytesIO(response.content)
     return image
-
-
-def get_name_and_extension_file(url):
-    url_split = urlsplit(url)
-    path = url_split.path
-    path = unquote(path)
-    head, tail = os.path.split(path)
-    name, extension = os.path.splitext(tail)
-    return name, extension
 
 
 def get_img_xkcd():
@@ -47,12 +30,12 @@ def get_img_xkcd():
     return response["img"], response['title'], response['alt']
 
 
-def upload_to_vk(vk_session, image, name):
+def upload_to_vk(vk_session, image):
     response = vk_session.method('photos.getWallUploadServer'),
     if 'error' in response:
         raise Exception(response)
     album_id, upload_url, user_id = response[0].values()
-    response = requests.post(upload_url, files={"photo": (name, image)})
+    response = requests.post(upload_url, files={"photo": ('.jpg/.png', image)})
     response.raise_for_status()
     server, photo, hash_ = response.json().values()
     photos = vk_session.method(
@@ -69,7 +52,7 @@ def create_parser():
     parser.add_argument(
         '-id',
         help='Group or user id, can be defined in env VK_GROUP_ID',
-        default=os.getenv('VK_GROUP_ID', default=None),
+        default=None,
     )
     return parser
 
@@ -82,12 +65,12 @@ def main():
     parser = create_parser()
     args = parser.parse_args()
     group_id = args.id
+    if not group_id:
+        group_id = os.getenv('VK_GROUP_ID', default=None)
     image_url, title, alt = get_img_xkcd()
-    default_name, default_extension = get_name_and_extension_file(image_url)
     image = fetch_buffered_file(image_url)
-    img_name = f'{default_name}{default_extension}'
-    attachment = upload_to_vk(vk_session, image, img_name)
-    vk.wall.post(owner_id=group_id, message=alt, attachments=attachment)
+    attachment = upload_to_vk(vk_session, image)
+    vk.wall.post(owner_id=f'{group_id}', message=alt, attachments=attachment, from_group=1)
 
 
 if __name__ == '__main__':
