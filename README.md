@@ -13,9 +13,7 @@ pip install -r requirements.txt
 
 Создайте файл `.env` в корне проекта и добавьте необходимые переменные окружения:  
 VK_ACCESS_TOKEN - ваш [ВК](https://vk.com/) токен с разрешениями: **scope=groups,photos,offline,wall**  
-VK_GROUP_ID - id группы или id пользователя  
-Note: 
-* id_группы начинается с '-'. Пример: -123456789
+VK_GROUP_ID - id группы
 
 VK_GROUP_ID также можно передать в качестве аргумента 
 

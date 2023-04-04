@@ -70,7 +70,7 @@ def main():
     image_url, title, alt = get_img_xkcd()
     image = fetch_buffered_file(image_url)
     attachment = upload_to_vk(vk_session, image)
-    vk.wall.post(owner_id=f'{group_id}', message=alt, attachments=attachment, from_group=1)
+    vk.wall.post(owner_id=f'-{group_id}', message=alt, attachments=attachment, from_group=1)
 
 
 if __name__ == '__main__':
